@@ -80,14 +80,9 @@ void ARProcessor::setup(){
 
 
 void ARProcessor::draw(){
-    cameraFbo.begin();
     cameraConvertShader.begin();
     cameraPlane.draw();
     cameraConvertShader.end();
-    cameraFbo.end();
-    
-    
-    cameraFbo.draw((ofGetWidth()-cFboWidth)/2,0,cFboWidth,cFboHeight);
    /*
     
     cameraFbo.begin();

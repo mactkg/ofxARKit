@@ -61,7 +61,16 @@ namespace ARToolbox {
                                                 
                                                 const vec2 scale = vec2(0.5,0.5);
                                                 void main(){
+                                                    
+                                                    
                                                     vUv = position.xy * scale + scale;
+                                                    
+                                                    // fix scaling?
+                                                    // https://stackoverflow.com/questions/24651369/blend-textures-of-different-size-coordinates-in-glsl/24654919#24654919
+                                                    vec2 fromCenter = vUv - scale;
+                                                    vec2 scaleFromCenter = fromCenter * vec2(1.7);
+                                                    
+                                                    vUv -= scaleFromCenter;
                                                     
                                                     gl_Position = rotationMatrix * vec4(position,0.0,1.0);
                                                 }
@@ -83,10 +92,12 @@ namespace ARToolbox {
                                                   void main(){
                                                       
                                                       // flip uvs so image isn't inverted.
-                                                      //vec2 textureCoordinate = vec2(vUv.s,1.0 - vUv.t);
+                                                      vec2 textureCoordinate = vec2(vUv.s,1.0 - vUv.t);
+                                                      
+                                                      //textureCoordinate += 1.7;
                                                       
                                                       // TODO just use vUv later - doing this cause quick
-                                                      vec2 textureCoordinate = vUv;
+                                                      //vec2 textureCoordinate = vUv;
                                                       
                                                       // Using BT.709 which is the standard for HDTV
                                                       mat3 colorConversionMatrix = mat3(
