@@ -35,7 +35,9 @@ class ARProcessor {
 
     float ambientIntensity;
     
-    ofVec2f viewportSize;
+    CGSize viewportSize;
+    
+    bool initialAnchor = false;
     
     // ========== CAMERA IMAGE STUFF ================= //
     ofFbo cameraFbo;
@@ -44,7 +46,6 @@ class ARProcessor {
     float cFboWidth,cFboHeight;
     
     ofVec2f bufferSize;
-    bool bufferSizeSet;
     
     CVOpenGLESTextureRef yTexture;
     CVOpenGLESTextureRef CbCrTexture;

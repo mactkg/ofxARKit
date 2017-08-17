@@ -84,7 +84,10 @@ namespace ARToolbox {
                                                       
                                                       // flip uvs so image isn't inverted.
                                                       //vec2 textureCoordinate = vec2(vUv.s,1.0 - vUv.t);
+                                                      
+                                                      // TODO just use vUv later - doing this cause quick
                                                       vec2 textureCoordinate = vUv;
+                                                      
                                                       // Using BT.709 which is the standard for HDTV
                                                       mat3 colorConversionMatrix = mat3(
                                                                                         1.164,  1.164, 1.164,
