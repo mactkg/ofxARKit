@@ -39,6 +39,10 @@ class ARProcessor {
     
     // ========== CAMERA IMAGE STUFF ================= //
     ofFbo cameraFbo;
+    ofFbo cameraRenderFbo;
+    
+    float cFboWidth,cFboHeight;
+    
     ofVec2f bufferSize;
     bool bufferSizeSet;
     

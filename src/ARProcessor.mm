@@ -68,8 +68,8 @@ void ARProcessor::setup(){
     CbCrTexture = NULL;
     
     // correct video orientation
-    rotation.makeRotationMatrix(-90, ofVec3f(0,0,1));
-    
+    rotation.makeRotationMatrix(90, ofVec3f(0,0,1));
+  
     
     
     // initialize video texture cache
@@ -79,42 +79,19 @@ void ARProcessor::setup(){
     }
 }
 
-CVOpenGLESTextureRef ARProcessor::createTextureFromPixelBuffer(CVPixelBufferRef pixelBuffer,int planeIndex,GLenum format,int width,int height){
-    CVOpenGLESTextureRef texture = NULL;
-    
-    if(width == 0 || height == 0){
-        width = (int) CVPixelBufferGetWidth(pixelBuffer);
-        height = (int) CVPixelBufferGetHeight(pixelBuffer);
-    }
-    
-    CVReturn err = noErr;
-    err = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
-                                                       _videoTextureCache,
-                                                       pixelBuffer,
-                                                       NULL,
-                                                       GL_TEXTURE_2D,
-                                                       format,
-                                                       width,
-                                                       height,
-                                                       format,
-                                                       GL_UNSIGNED_BYTE,
-                                                       planeIndex,
-                                                       &texture);
-    
-    if (err != kCVReturnSuccess) {
-        CVBufferRelease(texture);
-        texture = nil;
-        NSLog(@"Error at CVOpenGLESTextureCacheCreateTextureFromImage %d", err);
-    }
-    
-    return texture;
-}
 
 void ARProcessor::draw(){
-    
-    cameraConvertShader.begin();
-    cameraPlane.draw();
-    cameraConvertShader.end();
+  
+    if(cameraFbo.isAllocated()){
+        cameraFbo.begin();
+        cameraConvertShader.begin();
+        cameraPlane.draw();
+        cameraConvertShader.end();
+        cameraFbo.end();
+        
+        cameraFbo.draw((ofGetWidth()-cFboWidth)/2,0,cFboWidth,cFboHeight);
+      
+    }
    
 }
 
@@ -152,12 +129,17 @@ void ARProcessor::update(){
         if(!bufferSizeSet){
             
             // save buffer size.
-            // TODO - need to test : should it be CVPixelBufferGetWidth(Height)ofPlane?
             bufferSize.x = (float) CVPixelBufferGetWidth(pixelBuffer);
             bufferSize.y = (float) CVPixelBufferGetHeight(pixelBuffer);
             
             // now we can allocte the FBO now that we know how large the pixelBuffer is.
             cameraFbo.allocate(bufferSize.x, bufferSize.y,GL_RGBA);
+            
+            float ratio = bufferSize.x / bufferSize.y;
+            
+            cFboWidth = ofGetHeight() * ratio;
+            cFboHeight = ofGetHeight();
+            
             
             bufferSizeSet = true;
         }
@@ -171,6 +153,8 @@ void ARProcessor::update(){
             }
         }
         
+     
+        
     }
     
     // Periodic texture cache flush every frame
@@ -182,7 +166,36 @@ void ARProcessor::updatePlanes(){
         
     }
 }
-
+CVOpenGLESTextureRef ARProcessor::createTextureFromPixelBuffer(CVPixelBufferRef pixelBuffer,int planeIndex,GLenum format,int width,int height){
+    CVOpenGLESTextureRef texture = NULL;
+    
+    if(width == 0 || height == 0){
+        width = (int) CVPixelBufferGetWidth(pixelBuffer);
+        height = (int) CVPixelBufferGetHeight(pixelBuffer);
+    }
+    
+    CVReturn err = noErr;
+    err = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault,
+                                                       _videoTextureCache,
+                                                       pixelBuffer,
+                                                       NULL,
+                                                       GL_TEXTURE_2D,
+                                                       format,
+                                                       width,
+                                                       height,
+                                                       format,
+                                                       GL_UNSIGNED_BYTE,
+                                                       planeIndex,
+                                                       &texture);
+    
+    if (err != kCVReturnSuccess) {
+        CVBufferRelease(texture);
+        texture = nil;
+        NSLog(@"Error at CVOpenGLESTextureCacheCreateTextureFromImage %d", err);
+    }
+    
+    return texture;
+}
 void ARProcessor::buildCameraFrame(CVPixelBufferRef pixelBuffer){
     CVPixelBufferLockBaseAddress(pixelBuffer, 0);
     

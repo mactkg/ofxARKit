@@ -58,8 +58,7 @@ void ofApp::setup() {
     
     processor->setup();
     
-    
-    
+
     
 }
 
